@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  capture_id: 
+  filename: MyString
+
+two:
+  capture_id: 
+  filename: MyString

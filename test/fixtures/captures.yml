@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  camera_file: MyString
+  thumbnail: MyString
+  fullsize: MyString
+
+two:
+  camera_file: MyString
+  thumbnail: MyString
+  fullsize: MyString

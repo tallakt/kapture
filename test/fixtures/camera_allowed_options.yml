@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  value: MyString
+  camera_option_id: 
+
+two:
+  value: MyString
+  camera_option_id: 
