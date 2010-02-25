@@ -227,8 +227,8 @@ class KaptureDrb
     GPhoto2::LIBGPHOTO2_VERSION
   end
 
-  def camera_abilities
-    @c.abilities
+  def camera_model_name
+    @c.model_name
   end
 end
 

@@ -2,10 +2,9 @@ class CameraConfigController < ApplicationController
   before_filter :update_mode, :except => [:select_option]
 
   def index
-    @mode = get_kaptured_drb.mode
     @options = CameraOption.find :all, :order => :name
-    @version = get_kaptured_drb.gphoto_version
-    @abilities = get_kaptured_drb.camera_abilities
+    @version = get_kaptured_drb.gphoto_version rescue ''
+    @model_name = get_kaptured_drb.camera_model_name rescue ''
   end
 
   def select_option
