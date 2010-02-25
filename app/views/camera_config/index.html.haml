@@ -1,0 +1,26 @@
+%h1 Camera configuration
+
+%p 
+  Your camera is: 
+  = @abilities[:model]
+  
+ 
+ 
+- if @options.empty?
+  %p Your camera does not support any settings
+- else
+  %table
+    - @options.each do |o|
+      %tr.option{ :id => "camera_option_#{o.id}" }
+        = render :partial => 'single_option_table_row', :locals => {:o => o}
+
+%p
+  = 'GPhoto2 library version: ' + @version + '. '
+  More info on
+  %a{:href=>"http://www.gphoto.org/doc/remote/"}this page
+
+%p
+  Note that many Canon EOS cameras require version 2.4.8 or newer in order to work.
+
+%p
+  = link_to 'Back', :back

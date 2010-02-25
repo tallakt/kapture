@@ -5,12 +5,13 @@ class WorkerQueue
       @tasks = []
       @cv = ConditionVariable.new
       @idle_callback = idle_callback
+      @mutex = Mutex.new
   end
 
   def << (task)
     @mutex.synchronize do 
-      tasks << task
-      @cw.signal
+      @tasks << task
+      @cv.signal
     end
   end
 
@@ -21,7 +22,7 @@ class WorkerQueue
   def next_task
     @mutex.synchronize do 
       @idle_callback.call if @idle_callback and @tasks.empty?
-      @cw.wait(@mutex) while @tasks.empty?
+      @cv.wait(@mutex) while @tasks.empty?
       @tasks.shift 
     end
   end

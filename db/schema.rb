@@ -9,12 +9,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100223194636) do
+ActiveRecord::Schema.define(:version => 20100224131130) do
 
   create_table "camera_allowed_options", :force => true do |t|
     t.string   "value"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "camera_option_id"
   end
 
   create_table "camera_options", :force => true do |t|
@@ -22,6 +23,7 @@ ActiveRecord::Schema.define(:version => 20100223194636) do
     t.string   "value"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "opt_type"
   end
 
   create_table "capture_derivatives", :force => true do |t|

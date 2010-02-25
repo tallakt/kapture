@@ -1,0 +1,18 @@
+%td.name 
+  = o.name.capitalize
+%td.value 
+  - case o.opt_type
+  - when 5
+    - o.camera_allowed_options.each do |ao|
+      - if ao.value == o.value
+        .selected_option
+          = ao.value
+      - else
+        .available_option
+          = button_to_remote ao.value, :update => "camera_option_#{o.id}", :url => {:action => :select_option, :id => ao }
+  - else
+    = o.value
+%td.type 
+  = o.opt_type
+
+
