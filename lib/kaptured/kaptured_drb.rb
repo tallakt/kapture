@@ -7,8 +7,9 @@ require 'kaptured/worker_queue'
 
 class KaptureDrb
   include ActiveSupport::BufferedLogger::Severity
+  include FileUtils
 
-  CAM_FOLDER = Rails.root.join 'public/cam_images/'
+  CAM_FOLDER = 'images/camera/'
   DERIVATIVE_FOLDER = CAM_FOLDER + 'derived/'
   FULLSIZE_FOLDER = CAM_FOLDER + 'fullsize/'
   PREVIEW_FOLDER = CAM_FOLDER + 'preview/'
@@ -20,7 +21,6 @@ class KaptureDrb
     @logger = nil
     @c = GPhoto2::Camera.new
     @tasks = WorkerQueue.new { @mode = :ready }
-    capture
     add_task { initialize_config }
   end
 
@@ -41,7 +41,8 @@ class KaptureDrb
       co.name, co.value = k, v
       co.opt_type = @c[k, :type]
       co.save
-      @c[k, :all].each {|allowed| co.camera_allowed_options.create :value => allowed }
+      all = @c[k, :all]
+      all.each {|allowed| co.camera_allowed_options.create :value => allowed } unless all.size > 30
     end
   end
 
@@ -113,10 +114,10 @@ class KaptureDrb
     begin
       canon_hack_capture
       file = @c.files(1).last
-      preview_name = PREVIEW_FOLDER + file.sub(/\..*?$/, '.JPEG').downcase
-      mkdir_p PREVIEW_FOLDER
-      @c.save :type => :preview, :to_folder => folder, :new_name => preview_name
-      cap.preview = folder + preview_name
+      preview_name = file.sub(/\..*?$/, '.JPG').downcase
+      mkdir_p Rails.root.join 'public', PREVIEW_FOLDER
+      @c.save :type => :preview, :to_folder => (Rails.root.join 'public', PREVIEW_FOLDER).to_s, :new_name => preview_name
+      cap.thumbnail = PREVIEW_FOLDER + preview_name
       cap.camera_file = file
       cap.save
     rescue => e
@@ -143,14 +144,14 @@ class KaptureDrb
       @mode = :downloading
       begin
         mkdir_p FULLSIZE_FOLDER
-        @c.save :to_folder => folder, :name => cap.camera_file, :new_name => cap.camera_file.downcase
+        @c.save :to_folder => FULLSIZE_FOLDER, :name => cap.camera_file, :new_name => cap.camera_file.downcase
         cap.fullsize = folder + cap.camera_file.downcase
         jpeg = nil
         # Convert RAW images to JPEG for viewing in browser
         if not cap.fullsize.match /jpe?g/
           @mode = :convert_raw
           mkdir_p DERIVATIVE_FOLDER
-          derivative_filename = DERIVATIVE_FOLDER + cap.camera_file.sub(/\..*?$/, 'jpeg').downcase
+          derivative_filename = DERIVATIVE_FOLDER + cap.camera_file.sub(/\..*?$/, 'jpg').downcase
           %x{/usr/bin/dcraw -c -w #{cap.fullsize}| /usr/bin/cjpeg > #{derivative_filename}}
           if File.exists? derivative_filename
             cap.capture_derivatives.create :comment => 'Converted to JPEG from RAW', :filename => derivative_filename
@@ -168,14 +169,14 @@ class KaptureDrb
             # medium image is 2_000_000 pixels
             factor_medium = Math.sqrt(2_000_000.0 / area)
             img.resize img.width * factor, img.height * factor do |medium|
-              med_file = jpeg.sub /\.jpe?g$/, '-medium.jpeg'
+              med_file = jpeg.sub /\.jpe?g$/, '-medium.jpg'
               medium.save med_file
               cap.capture_derivatives.create :comment => 'Medium size 2Mpix', :filename => med_file
 
               # Small image is 0.25 megapixel
               factor_small = Math.sqrt(0.25 / 2.0)
               medium.resize medium.width * factor_small, medium.height * factor_small do |small|
-                small_file = jpeg.sub /\.jpe?g$/, '-small.jpeg'
+                small_file = jpeg.sub /\.jpe?g$/, '-small.jpg'
                 small.save small_file
                 cap.capture_derivatives.create :comment => 'Small size 0.25Mpix', :filename => small_file
               end

@@ -1,7 +1,7 @@
 # Mostly copied from http://www.dansketcher.com/2009/04/08/ruby-daemons-and-vendoring/
 
 require 'rubygems'
-#require 'daemons'
+require 'daemons'
 require 'drb'
 
 include ActiveSupport::BufferedLogger::Severity
@@ -22,7 +22,7 @@ options = {
              :monitor    => true
            }
 
-#Daemons.run_proc(FILE_NAME, options) do
+Daemons.run_proc(FILE_NAME, options) do
   # New logger for activerecord and this app, normal log is closed on app exit
   logger = ActiveSupport::BufferedLogger.new Rails.root.join 'log', 'kaptured_%s.log' % RAILS_ENV
   ActiveRecord::Base.logger = logger
@@ -37,7 +37,16 @@ options = {
         DRb.start_service 'drbunix:///tmp/kaptured', kd
         #DRb.start_service nil, kd
         logger.add INFO, 'DRB URI: ' + DRb.uri
-        kd.run # loops forever
+        exceptions = []
+        Thread.new {
+          begin
+            kd.run # loops forever
+          rescue e
+            exceptions << e
+          end
+        }.join
+        raise exceptions.first if exceptions.any?
+        
       ensure
         DRb.stop_service
         DRb.thread.join if DRb.thread
@@ -48,6 +57,6 @@ options = {
       sleep 5
     end
   end
-#end
+end
 
 
