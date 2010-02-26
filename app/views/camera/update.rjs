@@ -1,4 +1,4 @@
-page.replace_html 'mode', @mode
+page.replace_html 'mode', render(:partial => 'camera/mode')
 
 if @preview && @preview.thumbnail
   page.replace_html 'preview', render(:partial => 'thumbnail', :locals => {:preview => @preview})

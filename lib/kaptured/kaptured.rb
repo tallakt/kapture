@@ -12,7 +12,7 @@ FILE_NAME = File.basename(__FILE__) # name to report as the process
 
 # add lib/kaptured to lib path
 $:.unshift Rails.root.join 'lib'
-require 'kaptured/kaptured_drb'
+require 'kaptured/kaptured_worker'
 
 options = {
              :multiple   => false,
@@ -31,26 +31,10 @@ Daemons.run_proc(FILE_NAME, options) do
 
   loop do
     begin
-      kd = KaptureDrb.new
+      kd = KaptureWorker.new
       kd.logger = logger
-      begin
-        DRb.start_service 'drbunix:///tmp/kaptured', kd
-        #DRb.start_service nil, kd
-        logger.add INFO, 'DRB URI: ' + DRb.uri
-        exceptions = []
-        Thread.new {
-          begin
-            kd.run # loops forever
-          rescue e
-            exceptions << e
-          end
-        }.join
-        raise exceptions.first if exceptions.any?
-        
-      ensure
-        DRb.stop_service
-        DRb.thread.join if DRb.thread
-      end
+      kd.run # loops forever
+
     rescue => e
       logger.add WARN, e.inspect
       logger.add WARN, '   at: ' + e.backtrace.first unless e.message.match 'Unknown model'

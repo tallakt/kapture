@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100224131130) do
+ActiveRecord::Schema.define(:version => 20100226152755) do
 
   create_table "camera_allowed_options", :force => true do |t|
     t.string   "value"
@@ -37,6 +37,20 @@ ActiveRecord::Schema.define(:version => 20100224131130) do
     t.string   "camera_file"
     t.string   "thumbnail"
     t.string   "fullsize"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "worker_feedbacks", :force => true do |t|
+    t.string   "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "gphoto_version"
+    t.string   "model_name"
+  end
+
+  create_table "worker_tasks", :force => true do |t|
+    t.string   "task_yaml"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

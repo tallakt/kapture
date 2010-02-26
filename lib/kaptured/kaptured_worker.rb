@@ -2,10 +2,9 @@ require 'active_record'
 require 'gphoto4ruby'
 require 'fileutils'
 require 'image_science'
+require 'yaml'
 
-require 'kaptured/worker_queue'
-
-class KaptureDrb
+class KaptureWorker
   include ActiveSupport::BufferedLogger::Severity
   include FileUtils
 
@@ -14,94 +13,114 @@ class KaptureDrb
   FULLSIZE_FOLDER = CAM_FOLDER + 'fullsize/'
   PREVIEW_FOLDER = CAM_FOLDER + 'preview/'
 
-  attr_reader :mode
   attr_accessor :logger
 
   def initialize
     @logger = nil
     @c = GPhoto2::Camera.new
-    @tasks = WorkerQueue.new { @mode = :ready }
-    add_task { initialize_config }
+    @feedback = WorkerFeedback.first || WorkerFeedback.create
+    WorkerTask.delete_all # start fresh
   end
 
   def run
-    @tasks.run
+    begin
+      initialize_config
+      loop do
+        while perform_new_tasks do
+        end
+        feedback :ready
+        sleep 0.5
+      end
+    ensure
+      feedback :disconnected
+    end
   end
 
-  def add_task(&block) 
-    @tasks << block
+  def feedback(m)
+    @feedback.status = m.to_s.humanize
+    @feedback.gphoto_version = GPhoto2::LIBGPHOTO2_VERSION
+    @feedback.model_name = @c.model_name
+    @feedback.save
   end
+
+  def perform_new_tasks
+    result = false
+    WorkerTask.all.each do |task_record|
+      task = YAML::load task_record.task_yaml
+      # most primitive security scheme
+      send task[:method], *(task[:args] || []) unless Object.respond_to? task[:method]
+      task_record.delete
+      result = true
+    end
+    result
+  end
+  private :perform_new_tasks
 
   def initialize_config
-    @mode = :initializing
+    feedback :initializing
     CameraAllowedOption.delete_all # unsafe fast
     CameraOption.delete_all # unsafe fast
     get_fixed_config.each do |k,v|
-      co = CameraOption.new
-      co.name, co.value = k, v
-      co.opt_type = @c[k, :type]
-      co.save
+      co = CameraOption.create :name => k, :value => v, :opt_type => @c[k, :type]
       all = @c[k, :all]
       all.each {|allowed| co.camera_allowed_options.create :value => allowed } unless all.size > 30
     end
   end
+  private :initialize_config
 
   def get_fixed_config
     c = @c.config(:no_cache)
     c.reject! {|k,v| k == 'capture'}
     c
   end
+  private :get_fixed_config
   
   # Outside interface
 
   def capture
-    cap = Capture.new
-    cap.save
-    add_task do
-      @mode = :capture
+    feedback :capture
+    perform_capture
+  end
+
+
+  def capture_many
+    @stop_capture = false
+    continous_capture
+  end
+
+  def end_continuous_capture
+    @stop_capture = true
+  end
+
+  def continuous_capture
+      feedback :continuous_capture
       perform_capture
-    end
-    cap.id
-  end
-
-
-  def capture_many(sleep_time = 0)
-    add_task do 
-      @mode = :continuous_capture
-      while @mode == :continuous_capture do
-        perform_capture
-        sleep sleep_time
+      if not @stop_capture
+        new_task = WorkerTask.create :task_yaml => {:method => :continuous_capture }.to_yaml
+        new_task.save
       end
-    end
   end
+  private :continuous_capture
 
 
-  def bracket_capture(delta = 2)
+  def bracket_capture
+    delta = 2
     raise 'Camera does not exposure compensation' unless @c.config.key? 'exposurecompensation'
     available = @c['exposurecompensation', :all]
     i = available.index @c['exposurecompensation']
     evs = available.values_at [i - delta, i, i + delta]
     raise 'Not possible with available exposures' unless evs.size == 3
 
-    caps = (0..2).map { Capture.new }
-    caps.each {|c| c.save }
-    add_task do 
-      @mode = :bracket_capture
-      caps.zip(evs).each do |zipped|
-        cap, ev = zipped
-        @c.merge_config 'exposurecompensation' => ev
-        perform_capture cap
-      end
-      # restore original setting
+    feedback :bracket_capture
+    caps.zip(evs).each do |zipped|
+      cap, ev = zipped
       @c.merge_config 'exposurecompensation' => ev
+      perform_capture cap
     end
-    caps.map {|c| c.id }
+    # restore original setting
+    @c.merge_config 'exposurecompensation' => ev
   end
 
-
-  def end_continuous_capture
-    @mode = :end_continous_capture
-  end
 
   def canon_hack_capture
     if @c.config.key? 'capture'
@@ -109,8 +128,10 @@ class KaptureDrb
     end
     @c.capture
   end
+  private :canon_hack_capture
 
-  def perform_capture(cap = Capture.new)
+  def perform_capture
+    cap = Capture.new
     begin
       canon_hack_capture
       file = @c.files(1).last
@@ -123,9 +144,10 @@ class KaptureDrb
     rescue => e
       cap.destroy
       log_exception 'Capture aborted', e
+      raise
     end
   end
-  private :perform_capture, :canon_hack_capture
+  private :perform_capture
 
   def log_exception(message, e)
       if logger
@@ -141,7 +163,7 @@ class KaptureDrb
     cap = Capture.find capture_id
     throw 'Invalid capture id' unless cap
     add_task do
-      @mode = :downloading
+      feedback :downloading
       begin
         mkdir_p FULLSIZE_FOLDER
         @c.save :to_folder => FULLSIZE_FOLDER, :name => cap.camera_file, :new_name => cap.camera_file.downcase
@@ -149,7 +171,7 @@ class KaptureDrb
         jpeg = nil
         # Convert RAW images to JPEG for viewing in browser
         if not cap.fullsize.match /jpe?g/
-          @mode = :convert_raw
+          feedback :convert_raw
           mkdir_p DERIVATIVE_FOLDER
           derivative_filename = DERIVATIVE_FOLDER + cap.camera_file.sub(/\..*?$/, 'jpg').downcase
           %x{/usr/bin/dcraw -c -w #{cap.fullsize}| /usr/bin/cjpeg > #{derivative_filename}}
@@ -163,7 +185,7 @@ class KaptureDrb
 
         # Create a medium resolution image for quick download
         if jpeg
-          @mode = :resizing
+          feedback :resizing
           ImageScience.with_image jpeg do |img|
             area = img.width * img.height
             # medium image is 2_000_000 pixels
@@ -206,14 +228,12 @@ class KaptureDrb
 
 
   def cleanup_camera
-    add_task do
-      @mode = :wipe_camera
-      @c.delete :all
-    end
+    feedback :wipe_camera
+    @c.delete :all
   end
 
-
   def set_camera_config(config)
+    feedback :set_config
     @c.config_merge config
     get_fixed_config # force update
     CameraOption.all.each do |co|
@@ -222,14 +242,6 @@ class KaptureDrb
         co.save
       end
     end
-  end
-
-  def gphoto_version
-    GPhoto2::LIBGPHOTO2_VERSION
-  end
-
-  def camera_model_name
-    @c.model_name
   end
 end
 

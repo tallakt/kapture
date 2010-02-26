@@ -2,7 +2,7 @@
 
 %p 
   Your camera is: 
-  = @camera_model
+  = @model_name
   
  
  
@@ -15,7 +15,7 @@
         = render :partial => 'single_option_table_row', :locals => {:o => o}
 
 %p
-  = 'GPhoto2 library version: ' + @version + '. '
+  = 'GPhoto2 library version: ' + @gphoto_version + '. '
   More info on
   %a{:href=>"http://www.gphoto.org/doc/remote/"}this page
 
