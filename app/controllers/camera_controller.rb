@@ -1,12 +1,11 @@
 class CameraController < ApplicationController
-  before_filter :update_feedback, :except => [:capture]
+  before_filter :update_feedback, :except => [:perform_capture]
 
   def index
-    @preview = Capture.last_with_preview
   end
 
 
-  def capture
+  def perform_capture
     WorkerTask.create :task_yaml => {:method => :capture}.to_yaml
     render :nothing => true
   end
@@ -17,5 +16,9 @@ class CameraController < ApplicationController
     respond_to do |format|
       format.js # update.rjs
     end
+  end
+
+  def capture
+    @preview = Capture.last_with_preview
   end
 end

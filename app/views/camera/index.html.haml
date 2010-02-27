@@ -1,12 +1,5 @@
-%h1 Camera
+%h1 KAPture
  
-#preview
-  - if @preview && @preview.thumbnail
-    = render :partial => 'thumbnail', :locals => {:preview => @preview}
- 
-%p
-  = button_to_remote 'Capture', :url => {:action => :capture }
-%p
-  = link_to 'Back', :back
-
-= periodically_call_remote :url => 'camera/update', :frequency => 2.0, :method => :get
+%ul
+  %li= link_to 'Camera settings', :controller => :camera_config
+  %li= link_to 'Capture', :action => :capture

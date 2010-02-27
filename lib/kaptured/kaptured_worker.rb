@@ -84,7 +84,7 @@ class KaptureWorker
   # Outside interface
 
   def capture
-    feedback :capture
+    feedback :capturing
     perform_capture
   end
 
@@ -99,7 +99,7 @@ class KaptureWorker
   end
 
   def continuous_capture
-      feedback :continuous_capture
+      feedback :capturing_repeated
       perform_capture
       if not @stop_capture
         new_task = WorkerTask.create :task_yaml => {:method => :continuous_capture }.to_yaml
@@ -117,7 +117,7 @@ class KaptureWorker
     evs = available.values_at [i - delta, i, i + delta]
     raise 'Not possible with available exposures' unless evs.size == 3
 
-    feedback :bracket_capture
+    feedback :capturing_bracket
     caps.zip(evs).each do |zipped|
       cap, ev = zipped
       @c.merge_config 'exposurecompensation' => ev
@@ -177,7 +177,7 @@ class KaptureWorker
         jpeg = nil
         # Convert RAW images to JPEG for viewing in browser
         if not cap.fullsize.match /jpe?g/
-          feedback :convert_raw
+          feedback :convertinf_from_raw_to_jpeg
           mkdir_p DERIVATIVE_FOLDER
           derivative_filename = DERIVATIVE_FOLDER + cap.camera_file.sub(/\..*?$/, 'jpg').downcase
           %x{/usr/bin/dcraw -c -w #{cap.fullsize}| /usr/bin/cjpeg > #{derivative_filename}}
@@ -234,12 +234,12 @@ class KaptureWorker
 
 
   def cleanup_camera
-    feedback :wipe_camera
+    feedback :wiping_camera
     @c.delete :all
   end
 
   def set_camera_config(config)
-    feedback :set_config
+    feedback :setting_config
     @c.config_merge config
     get_fixed_config # force update
     CameraOption.all.each do |co|
