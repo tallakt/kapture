@@ -15,15 +15,14 @@ class KaptureWorker
 
   attr_accessor :logger
 
-  def initialize
-    @logger = nil
-    @c = GPhoto2::Camera.new
-    @feedback = WorkerFeedback.first || WorkerFeedback.create
-    WorkerTask.delete_all # start fresh
-  end
-
   def run
     begin
+      @feedback = WorkerFeedback.first || WorkerFeedback.create
+      clear_config
+      @logger = nil
+      @c = GPhoto2::Camera.new
+      WorkerTask.delete_all # start fresh
+
       initialize_config
       loop do
         while perform_new_tasks do
@@ -39,7 +38,8 @@ class KaptureWorker
   def feedback(m)
     @feedback.status = m.to_s.humanize
     @feedback.gphoto_version = GPhoto2::LIBGPHOTO2_VERSION
-    @feedback.model_name = @c.model_name
+    @feedback.model_name = (@c && @c.model_name) || '' 
+    @feedback.updated_at_will_change!
     @feedback.save
   end
 
@@ -55,6 +55,12 @@ class KaptureWorker
     result
   end
   private :perform_new_tasks
+
+  def clear_config
+    CameraAllowedOption.delete_all # unsafe fast
+    CameraOption.delete_all # unsafe fast
+  end
+  private :clear_config
 
   def initialize_config
     feedback :initializing
