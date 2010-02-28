@@ -91,10 +91,10 @@ class KaptureWorker
 
   def capture_many
     @stop_capture = false
-    continous_capture
+    continuous_capture
   end
 
-  def end_continuous_capture
+  def end_capture_many
     @stop_capture = true
   end
 

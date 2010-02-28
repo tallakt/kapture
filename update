@@ -1,0 +1,4 @@
+try {
+Element.update("mode", "Ready\n");
+Element.update("preview", "<img alt='File on camera: DSCN0277.NEF' src='/images/camera/preview/dscn0277.jpg' />\n");
+} catch (e) { alert('RJS error:\n\n' + e.toString()); alert('Element.update(\"mode\", \"Ready\\n\");\nElement.update(\"preview\", \"<img alt=\'File on camera: DSCN0277.NEF\' src=\'/images/camera/preview/dscn0277.jpg\' />\\n\");'); throw e }

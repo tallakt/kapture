@@ -1,6 +1,6 @@
 - if @mode_update_time < 30.seconds.ago
   = @mode
-  = ' (%s ago)' % time_ago_in_words(@mode_update_time)
+  = ' (%s ago)' % time_ago_in_words(@mode_update_time, true)
 - else
   = @mode
 

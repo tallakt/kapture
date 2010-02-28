@@ -9,7 +9,7 @@
           = ao.value
       - else
         .available_option
-          = button_to_remote ao.value, :update => "camera_option_#{o.id}", :url => {:action => :select_option, :id => ao }
+          = button_to_remote ao.value, :url => {:action => :select_option, :id => ao }
   - else
     = o.value
 %td.type 

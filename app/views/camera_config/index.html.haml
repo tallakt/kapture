@@ -24,3 +24,5 @@
 
 %p
   = link_to 'Back', :back
+
+= periodically_call_remote :url => 'camera_config/update', :frequency => 1.0, :method => :get

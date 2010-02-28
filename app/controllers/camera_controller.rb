@@ -10,6 +10,16 @@ class CameraController < ApplicationController
     render :nothing => true
   end
 
+  def perform_end_capture_many
+    WorkerTask.create :task_yaml => {:method => :end_capture_many}.to_yaml
+    render :nothing => true
+  end
+
+  def perform_capture_many
+    WorkerTask.create :task_yaml => {:method => :capture_many}.to_yaml
+    render :nothing => true
+  end
+
   def update # AJAX
     @preview = Capture.last_with_preview
 
