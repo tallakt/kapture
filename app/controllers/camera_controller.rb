@@ -2,6 +2,7 @@ class CameraController < ApplicationController
   before_filter :update_feedback, :except => [:perform_capture]
 
   def index
+    @preview = Capture.last_with_preview
   end
 
 
@@ -20,15 +21,19 @@ class CameraController < ApplicationController
     render :nothing => true
   end
 
+  def perform_download
+    capture = Capture.find(params[:id])
+    raise 'Downloading nonexistent capture' unless capture
+    WorkerTask.create :task_yaml => {:method => :download, :args => [capture.id]}.to_yaml
+    #TODO redirect to browser for that image
+    render :nothing => true
+  end
+
   def update # AJAX
     @preview = Capture.last_with_preview
 
     respond_to do |format|
       format.js # update.rjs
     end
-  end
-
-  def capture
-    @preview = Capture.last_with_preview
   end
 end

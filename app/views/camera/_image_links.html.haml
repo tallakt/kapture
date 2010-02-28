@@ -1,0 +1,13 @@
+- if @preview
+  %ul
+    - if @preview.fullsize
+      %li
+        %a{:href => @preview.fullsize.sub(Rails.root.join('public').to_s, ''), :target => '_blank'} 
+          Original
+          = '[' + number_to_human_size(File.size(@preview.fullsize), :precision => 0) + ']'
+    - @preview.capture_derivatives.each do |deriv|
+      %li
+        %a{:href => deriv.filename.sub(Rails.root.join('public').to_s, ''), :target => '_blank'} 
+          = deriv.comment
+          = '[' + number_to_human_size(File.size(deriv.filename), :precision => 0) + ']'
+

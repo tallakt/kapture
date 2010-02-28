@@ -2,4 +2,6 @@ page.replace_html 'mode', render(:partial => 'camera/mode')
 
 if @preview && @preview.thumbnail
   page.replace_html 'preview', render(:partial => 'thumbnail', :locals => {:preview => @preview})
+  page.replace_html 'download', render(:partial => 'download_button')
+  page.replace_html 'image_links', render(:partial => 'image_links')
 end

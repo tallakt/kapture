@@ -19,8 +19,9 @@
   = yield
 
 
-  .homebuttons
-    =link_to 'KAPture Home', :controller => :camera
+  .links
+    =link_to 'Capture', :controller => :camera
+    =link_to 'Camera config', :controller => :camera_config
  
   #bunntekst
     %p Copyright 2010 Tallak Tveide

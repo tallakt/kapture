@@ -1,5 +1,22 @@
-%h1 KAPture
+%h1 Capture
  
-%ul
-  %li= link_to 'Camera settings', :controller => :camera_config
-  %li= link_to 'Capture', :action => :capture
+#preview
+  - if @preview && @preview.thumbnail
+    = render :partial => 'thumbnail', :locals => {:preview => @preview}
+
+#image_links
+  = render :partial => 'image_links'
+.buttons
+  #capture
+    = button_to_remote 'Capture', :url => {:action => :perform_capture }
+  #capture_many
+    = button_to_remote 'Capture many', :url => {:action => :perform_capture_many }
+  #stop_capture_many
+    = button_to_remote 'Stop capture many', :url => {:action => :perform_end_capture_many }
+  #download
+    = render :partial => 'download_button'
+
+%p
+  = link_to 'Back', :back
+
+= periodically_call_remote :url => 'camera/update', :frequency => 1.0, :method => :get

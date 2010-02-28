@@ -1,3 +1,3 @@
-%img{:src => "/#{preview.thumbnail}", :alt => "File on camera: #{preview.camera_file}" }
+= image_tag preview.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{preview.camera_file}"
 
 

@@ -1,25 +1,25 @@
-require 'active_record'
 require 'gphoto4ruby'
 require 'fileutils'
 require 'image_science'
 require 'yaml'
+require 'benchmark'
 
 class KaptureWorker
   include ActiveSupport::BufferedLogger::Severity
   include FileUtils
 
-  CAM_FOLDER = 'images/camera/'
-  DERIVATIVE_FOLDER = CAM_FOLDER + 'derived/'
-  FULLSIZE_FOLDER = CAM_FOLDER + 'fullsize/'
-  PREVIEW_FOLDER = CAM_FOLDER + 'preview/'
+  CAM_FOLDER = 'camera'
+  DERIVATIVE_FOLDER = 'derived'
+  FULLSIZE_FOLDER = 'fullsize'
+  PREVIEW_FOLDER = 'preview'
 
   attr_accessor :logger
 
   def run
+    @c = nil
     begin
       @feedback = WorkerFeedback.first || WorkerFeedback.create
       clear_config
-      @logger = nil
       @c = GPhoto2::Camera.new
       WorkerTask.delete_all # start fresh
 
@@ -27,11 +27,14 @@ class KaptureWorker
       loop do
         while perform_new_tasks do
         end
-        feedback :ready
+        @logger.silence do
+          feedback :ready
+        end
         sleep 0.5
       end
     ensure
       feedback :disconnected
+      @c.dispose if @c
     end
   end
 
@@ -45,10 +48,17 @@ class KaptureWorker
 
   def perform_new_tasks
     result = false
-    WorkerTask.all.each do |task_record|
+    all = nil
+    @logger.silence do
+      all = WorkerTask.all
+    end
+    all.each do |task_record|
       task = YAML::load task_record.task_yaml
       # most primitive security scheme
-      send task[:method], *(task[:args] || []) unless Object.respond_to? task[:method]
+      bm = Benchmark.measure 'Task ' + task[:method].to_s do
+        send task[:method], *(task[:args] || []) unless Object.respond_to? task[:method]
+      end
+      @logger.add INFO, 'Task %s (%.1f)' % [task[:method].to_s, bm.real]
       task_record.delete
       result = true
     end
@@ -142,9 +152,9 @@ class KaptureWorker
       canon_hack_capture
       file = @c.files(1).last
       preview_name = file.sub(/\..*?$/, '.JPG').downcase
-      mkdir_p Rails.root.join 'public', PREVIEW_FOLDER
-      @c.save :type => :preview, :to_folder => (Rails.root.join 'public', PREVIEW_FOLDER).to_s, :new_name => preview_name
-      cap.thumbnail = PREVIEW_FOLDER + preview_name
+      mkdir_p preview_f
+      @c.save :type => :preview, :to_folder => preview_f.to_s, :new_name => preview_name
+      cap.thumbnail = preview_f.join(preview_name).to_s
       cap.camera_file = file
       cap.save
     rescue => e
@@ -159,63 +169,86 @@ class KaptureWorker
       if logger
         logger.add INFO, message
         logger.add INFO, '   ' + e.inspect
-        logger.add INFO, '   at: ' + e.backtrace.first
+        logger.add INFO, '   at: ' + e.backtrace[0..5].join("\n")
       end
   end
   private :log_exception
 
+  def fullsize_f
+    Rails.root.join 'public', 'images', CAM_FOLDER, FULLSIZE_FOLDER
+  end
+
+  def derivative_f
+    Rails.root.join 'public', 'images', CAM_FOLDER, DERIVATIVE_FOLDER
+  end
+
+  def preview_f
+    Rails.root.join 'public', 'images', CAM_FOLDER, PREVIEW_FOLDER
+  end
 
   def download(capture_id)
+    mkdir_p fullsize_f
+    mkdir_p derivative_f
+
     cap = Capture.find capture_id
     throw 'Invalid capture id' unless cap
-    add_task do
-      feedback :downloading
-      begin
-        mkdir_p FULLSIZE_FOLDER
-        @c.save :to_folder => FULLSIZE_FOLDER, :name => cap.camera_file, :new_name => cap.camera_file.downcase
-        cap.fullsize = folder + cap.camera_file.downcase
-        jpeg = nil
-        # Convert RAW images to JPEG for viewing in browser
-        if not cap.fullsize.match /jpe?g/
-          feedback :convertinf_from_raw_to_jpeg
-          mkdir_p DERIVATIVE_FOLDER
-          derivative_filename = DERIVATIVE_FOLDER + cap.camera_file.sub(/\..*?$/, 'jpg').downcase
-          %x{/usr/bin/dcraw -c -w #{cap.fullsize}| /usr/bin/cjpeg > #{derivative_filename}}
-          if File.exists? derivative_filename
-            cap.capture_derivatives.create :comment => 'Converted to JPEG from RAW', :filename => derivative_filename
-            jpeg = derivative_filename
-          end
-        else
-          jpeg = cap.fullsize
+
+    feedback :downloading
+    begin
+      puts({:to_folder => fullsize_f.to_s, :name => cap.camera_file, :new_name => cap.camera_file.downcase}.inspect)
+      @c.save :to_folder => fullsize_f.to_s, :name => cap.camera_file, :new_name => cap.camera_file.downcase
+      cap.fullsize = fullsize_f.join(cap.camera_file.downcase).to_s
+      puts cap.fullsize + ' saved.'
+      jpeg = nil
+      # Convert RAW images to JPEG for viewing in browser
+      if not cap.fullsize.match /jpe?g/
+        feedback :converting_from_raw_to_jpeg
+        derivative_fn = derivative_f.join(cap.camera_file.sub(/\..*?$/, '.jpg').downcase).to_s
+        puts "running: /usr/bin/dcraw -c -w #{cap.fullsize} | /usr/bin/cjpeg > #{derivative_fn}"
+        %x{/usr/bin/dcraw -c -w #{cap.fullsize} | /usr/bin/cjpeg -quality 85 > #{derivative_fn}}
+        if File.exists? derivative_fn
+          cap.capture_derivatives.create :comment => 'Converted to JPEG from RAW', :filename => derivative_fn
+          jpeg = derivative_fn
         end
+      else
+        jpeg = cap.fullsize
+      end
 
-        # Create a medium resolution image for quick download
-        if jpeg
-          feedback :resizing
-          ImageScience.with_image jpeg do |img|
-            area = img.width * img.height
-            # medium image is 2_000_000 pixels
-            factor_medium = Math.sqrt(2_000_000.0 / area)
-            img.resize img.width * factor, img.height * factor do |medium|
-              med_file = jpeg.sub /\.jpe?g$/, '-medium.jpg'
-              medium.save med_file
-              cap.capture_derivatives.create :comment => 'Medium size 2Mpix', :filename => med_file
+      # Create a medium resolution image for quick download
+      if jpeg
+        puts 'resizing: ' + jpeg
+        feedback :resizing
+        ImageScience.with_image jpeg do |img|
+          area = img.width * img.height
+          puts 'area: %f' % (area / 1_000_000.0)
+          # medium image is 2.0 megapixel
+          factor_medium = Math.sqrt(2_000_000.0 / area)
+          img.resize img.width * factor_medium, img.height * factor_medium do |medium|
+            puts 'resized medium image'
+            med_file = new_derivative_fn jpeg, 'medium'
+            puts 'medium file: ' + med_file
+            medium.save med_file
+            cap.capture_derivatives.create :comment => 'Medium - 2 megapixel', :filename => med_file
 
-              # Small image is 0.25 megapixel
-              factor_small = Math.sqrt(0.25 / 2.0)
-              medium.resize medium.width * factor_small, medium.height * factor_small do |small|
-                small_file = jpeg.sub /\.jpe?g$/, '-small.jpg'
-                small.save small_file
-                cap.capture_derivatives.create :comment => 'Small size 0.25Mpix', :filename => small_file
-              end
+            # Small image is 0.25 megapixel
+            factor_small = Math.sqrt(0.25 / 2.0)
+            medium.resize medium.width * factor_small, medium.height * factor_small do |small|
+              small_file = new_derivative_fn jpeg, 'small'
+              small.save small_file
+              cap.capture_derivatives.create :comment => 'Small - 0.25 megapixel', :filename => small_file
             end
           end
         end
-        cap.save
-      rescue => e
-        log_exception 'Download failed', e
       end
+      cap.save
+    rescue => e
+      log_exception 'Download failed', e
     end
+  end
+
+  def new_derivative_fn(original, filename_addition)
+    new_base = File.basename(original).sub /[.]/, "-#{filename_addition}."
+    derivative_f.join(new_base).to_s
   end
 
 
