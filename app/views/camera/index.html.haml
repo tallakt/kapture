@@ -8,15 +8,13 @@
   = render :partial => 'image_links'
 .buttons
   #capture
-    = button_to_remote 'Capture', :url => {:action => :perform_capture }
+    = button_to_remote 'Capture', :url => {:action => :perform_capture, :method => :put }
   #capture_many
-    = button_to_remote 'Capture many', :url => {:action => :perform_capture_many }
+    = button_to_remote 'Capture many', :url => {:action => :perform_capture_many, :method => :put }
   #stop_capture_many
-    = button_to_remote 'Stop capture many', :url => {:action => :perform_end_capture_many }
+    = button_to_remote 'Stop capture many', :url => {:action => :perform_end_capture_many, :method => :put }
   #download
     = render :partial => 'download_button'
 
-%p
-  = link_to 'Back', :back
 
-= periodically_call_remote :url => 'camera/update', :frequency => 1.0, :method => :get
+= periodically_call_remote :url => 'camera', :frequency => 1.0, :method => :get

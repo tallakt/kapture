@@ -59,7 +59,7 @@ class KaptureWorker
         send task[:method], *(task[:args] || []) unless Object.respond_to? task[:method]
       end
       @logger.add INFO, 'Task %s (%.1f)' % [task[:method].to_s, bm.real]
-      task_record.delete
+      @logger.silence { task_record.delete }
       result = true
     end
     result
@@ -119,25 +119,6 @@ class KaptureWorker
   private :continuous_capture
 
 
-  def bracket_capture
-    delta = 2
-    raise 'Camera does not exposure compensation' unless @c.config.key? 'exposurecompensation'
-    available = @c['exposurecompensation', :all]
-    i = available.index @c['exposurecompensation']
-    evs = available.values_at [i - delta, i, i + delta]
-    raise 'Not possible with available exposures' unless evs.size == 3
-
-    feedback :capturing_bracket
-    caps.zip(evs).each do |zipped|
-      cap, ev = zipped
-      @c.merge_config 'exposurecompensation' => ev
-      perform_capture cap
-    end
-    # restore original setting
-    @c.merge_config 'exposurecompensation' => ev
-  end
-
-
   def canon_hack_capture
     if @c.config.key? 'capture'
       @c['capture'] = true
@@ -195,16 +176,13 @@ class KaptureWorker
 
     feedback :downloading
     begin
-      puts({:to_folder => fullsize_f.to_s, :name => cap.camera_file, :new_name => cap.camera_file.downcase}.inspect)
       @c.save :to_folder => fullsize_f.to_s, :name => cap.camera_file, :new_name => cap.camera_file.downcase
       cap.fullsize = fullsize_f.join(cap.camera_file.downcase).to_s
-      puts cap.fullsize + ' saved.'
       jpeg = nil
       # Convert RAW images to JPEG for viewing in browser
       if not cap.fullsize.match /jpe?g/
         feedback :converting_from_raw_to_jpeg
         derivative_fn = derivative_f.join(cap.camera_file.sub(/\..*?$/, '.jpg').downcase).to_s
-        puts "running: /usr/bin/dcraw -c -w #{cap.fullsize} | /usr/bin/cjpeg > #{derivative_fn}"
         %x{/usr/bin/dcraw -c -w #{cap.fullsize} | /usr/bin/cjpeg -quality 85 > #{derivative_fn}}
         if File.exists? derivative_fn
           cap.capture_derivatives.create :comment => 'Converted to JPEG from RAW', :filename => derivative_fn
@@ -216,17 +194,13 @@ class KaptureWorker
 
       # Create a medium resolution image for quick download
       if jpeg
-        puts 'resizing: ' + jpeg
         feedback :resizing
         ImageScience.with_image jpeg do |img|
           area = img.width * img.height
-          puts 'area: %f' % (area / 1_000_000.0)
           # medium image is 2.0 megapixel
           factor_medium = Math.sqrt(2_000_000.0 / area)
           img.resize img.width * factor_medium, img.height * factor_medium do |medium|
-            puts 'resized medium image'
             med_file = new_derivative_fn jpeg, 'medium'
-            puts 'medium file: ' + med_file
             medium.save med_file
             cap.capture_derivatives.create :comment => 'Medium - 2 megapixel', :filename => med_file
 
@@ -243,6 +217,7 @@ class KaptureWorker
       cap.save
     rescue => e
       log_exception 'Download failed', e
+      raise
     end
   end
 
@@ -253,21 +228,24 @@ class KaptureWorker
 
 
   def cleanup_beagle
+    feedback :cleaning_up_controller
     files = []
-    CaptureDerivatives.find(:all).each do |cd|
+    CaptureDerivative.find(:all).each do |cd|
       files << cd.filename
     end
-    Captures.find(:all).each do |cap|
-      files << cap.filename
+    Capture.find(:all).each do |cap|
+      files << cap.fullsize
+      files << cap.thumbnail
     end
-    CaptureDerivatives.delete_all # unsafe fast
-    Captures.delete_all # unsafe fast
-    File.delete files
+    CaptureDerivative.delete_all # unsafe fast
+    Capture.delete_all # unsafe fast
+    files.compact!
+    files.each {|f| File.delete f }
   end
 
 
   def cleanup_camera
-    feedback :wiping_camera
+    feedback :deleting_pictures_on_camera
     @c.delete :all
   end
 

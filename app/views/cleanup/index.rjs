@@ -1,0 +1,2 @@
+page.replace_html 'mode', render(:partial => 'camera/mode')
+page.replace_html 'count', render(:partial => 'cleanup/count')

@@ -3,6 +3,10 @@ class CameraController < ApplicationController
 
   def index
     @preview = Capture.last_with_preview
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
 
@@ -36,4 +40,6 @@ class CameraController < ApplicationController
       format.js # update.rjs
     end
   end
+
+
 end

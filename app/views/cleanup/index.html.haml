@@ -1,0 +1,17 @@
+%h1 Clean up
+
+%p#count
+  = render :partial => 'count'
+
+ 
+%p
+  Note that these functions will permanently remove all pictures from your camera or controller - no undo is possible.
+ 
+.buttons
+  #cleanup_beagle
+    = button_to 'Clean up controller', :action => :cleanup_beagle, :confirm => 'Delete all pictures on controller?'
+  #cleanup_camera
+    = button_to 'Clean up camera', :action => :cleanup_camera, :confirm => 'Delete all pictures on camera?'
+
+
+= periodically_call_remote :url => 'cleanup', :frequency => 1.0, :method => :get
