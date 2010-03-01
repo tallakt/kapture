@@ -14,14 +14,14 @@
     = flash[:notice]
  
   #mode
-    = render :partial => 'camera/mode'
+    = render :partial => 'capture/mode'
 
   = yield
 
 
   .links
-    =link_to 'Capture', :controller => :camera
-    =link_to 'Camera config', :controller => :camera_config
+    =link_to 'Capture', :controller => :capture
+    =link_to 'Config', :controller => :config
     =link_to 'Cleanup', :controller => :cleanup
  
   #bunntekst

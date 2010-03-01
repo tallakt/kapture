@@ -1,4 +1,4 @@
-page.replace_html 'mode', render(:partial => 'camera/mode')
+page.replace_html 'mode', render(:partial => 'capture/mode')
 
 @options.each do |o|
   page.replace_html "camera_option_#{o.id}", render(:partial => 'single_option_table_row', :locals => {:o => o})

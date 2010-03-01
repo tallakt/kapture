@@ -1,4 +1,4 @@
-class CameraController < ApplicationController
+class CaptureController < ApplicationController
   before_filter :update_feedback, :except => [:perform_capture]
 
   def index

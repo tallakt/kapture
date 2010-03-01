@@ -1,4 +1,4 @@
-class CameraConfigController < ApplicationController
+class ConfigController < ApplicationController
   before_filter :update_feedback, :except => [:select_option]
 
   def index
