@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang='en' xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'></html>
+<head>
+  <meta content='text/html;charset=UTF-8' http-equiv='content-type' />
+  <title>Kapture</title>
+  <link href="/stylesheets/standard.css" media="all" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/prototype.js?1266880699" type="text/javascript"></script>
+  <script src="/javascripts/effects.js?1266880699" type="text/javascript"></script>
+  <script src="/javascripts/dragdrop.js?1266880699" type="text/javascript"></script>
+  <script src="/javascripts/controls.js?1266880699" type="text/javascript"></script>
+  <script src="/javascripts/application.js?1266880699" type="text/javascript"></script>
+  <script src="/javascripts/prototype.js?1266880699" type="text/javascript"></script>
+</head>
+<body>
+  <p style='color: green'>
+    
+  </p>
+  <div id='mode'>
+    Disconnected
+     (about 2 hours ago)
+  </div>
+  <h1>Capture</h1>
+  <div id='preview'>
+    <img alt="File on camera: DSC_0022.JPG" src="/images/camera/preview/dsc_0022.jpg?1267721667" />
+  </div>
+  <div id='image_links'>
+    <ul>
+    </ul>
+  </div>
+  <div class='buttons'>
+    <div id='capture'>
+      <input onclick="new Ajax.Request('/capture/perform_capture?method=put', {asynchronous:true, evalScripts:true});" type="button" value="Capture" />
+    </div>
+    <div id='capture_many'>
+      <input onclick="new Ajax.Request('/capture/perform_capture_many?method=put', {asynchronous:true, evalScripts:true});" type="button" value="Capture many" />
+    </div>
+    <div id='stop_capture_many'>
+      <input onclick="new Ajax.Request('/capture/perform_end_capture_many?method=put', {asynchronous:true, evalScripts:true});" type="button" value="Stop capture many" />
+    </div>
+    <div id='download'>
+      <input onclick="new Ajax.Request('/capture/perform_download/207', {asynchronous:true, evalScripts:true});" type="button" value="Download" />
+    </div>
+  </div>
+  <script type="text/javascript">
+  //<![CDATA[
+  new PeriodicalExecuter(function() {new Ajax.Request('capture', {asynchronous:true, evalScripts:true, method:'get'})}, 1.0)
+  //]]>
+  </script>
+  <div class='links'>
+    <a href="/">Capture</a>
+    <a href="/config">Config</a>
+    <a href="/cleanup">Cleanup</a>
+  </div>
+  <div id='bunntekst'>
+    <p>Copyright 2010 Tallak Tveide</p>
+  </div>
+</body>

@@ -1,4 +1,4 @@
-- if preview
-  = image_tag preview.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{preview.camera_file}"
+- if capture
+  = image_tag capture.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{capture.camera_file}"
 
 

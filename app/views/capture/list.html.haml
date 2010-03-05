@@ -1,0 +1,16 @@
+%h1 Browse
+ 
+- @captures.each do |capture|
+  - if capture && capture.thumbnail
+    .capture{:id => "capture_#{capture.id}"}
+      .preview
+        = render :partial => 'thumbnail', :locals => {:capture => capture}
+      .image_links
+        = render :partial => 'image_links', :locals => {:capture => capture}
+      .buttons
+        .download
+          = render :partial => 'download_button', :locals => {:capture => capture}
+
+
+
+= periodically_call_remote :url => 'capture/list', :frequency => 1.0, :method => :get

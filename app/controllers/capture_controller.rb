@@ -2,13 +2,21 @@ class CaptureController < ApplicationController
   before_filter :update_feedback, :except => [:perform_capture]
 
   def index
-    @preview = Capture.last_with_preview
+    @capture = Capture.last_with_preview
     respond_to do |format|
       format.html
       format.js
     end
   end
 
+  def list
+    @captures = Capture.paginate :page => params[:page], :order => 'created_at DESC', :per_page => 5
+    puts @captures.inspect
+    respond_to do |format|
+      format.html
+      format.js
+    end
+  end
 
   def perform_capture
     WorkerTask.create :task_yaml => {:method => :capture}.to_yaml
@@ -32,14 +40,4 @@ class CaptureController < ApplicationController
     #TODO redirect to browser for that image
     render :nothing => true
   end
-
-  def update # AJAX
-    @preview = Capture.last_with_preview
-
-    respond_to do |format|
-      format.js # update.rjs
-    end
-  end
-
-
 end
