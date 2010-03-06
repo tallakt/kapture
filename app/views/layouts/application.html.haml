@@ -4,27 +4,31 @@
  
 %head
   %meta{ 'http-equiv' => "content-type", :content => "text/html;charset=UTF-8"}
+  %meta{ 'name' => "viewport", :content => "width=device-width"}
   %title Kapture
   = stylesheet_link_tag 'standard', :media => :all
+  = stylesheet_link_tag 'kapture', :media => :all
   = javascript_include_tag :defaults
   = javascript_include_tag 'prototype'
  
 %body
-  %p{:style => "color: green"}
-    = flash[:notice]
- 
-  #mode
-    = render :partial => 'capture/mode'
+  .bounding
+    %p#flash{:style => "color: green"}
+      = flash[:notice]
+   
+    #mode
+      = render :partial => 'capture/mode'
 
-  = yield
+    .menu
+      =link_to 'Capture', :controller => :capture
+      =link_to 'Browse', :controller => :capture, :action => :list
+      =link_to 'Config', :controller => :config
+      =link_to 'Cleanup', :controller => :cleanup
+   
+    .content
+      = yield
 
 
-  .links
-    =link_to 'Capture', :controller => :capture
-    =link_to 'Browse', :controller => :capture, :action => :list
-    =link_to 'Config', :controller => :config
-    =link_to 'Cleanup', :controller => :cleanup
- 
-  #bunntekst
-    %p Copyright 2010 Tallak Tveide
+    .footer
+      Copyright 2010 Tallak Tveide
 

@@ -1,14 +1,12 @@
-%h1 Capture
- 
 #preview
   - if @capture && @capture.thumbnail
     = render :partial => 'thumbnail', :locals => {:capture => @capture}
 
 .buttons
   #capture
-    = button_to_remote 'Capture', :url => {:action => :perform_capture, :method => :put }
+    = button_to_remote 'Capture', :url => {:action => :perform_capture, :method => :post }
   #capture_many
-    = button_to_remote 'Capture many', :url => {:action => :perform_capture_many, :method => :put }
+    = button_to_remote 'Capture many', :url => {:action => :perform_capture_many, :method => :post }
   #stop_capture_many
     = button_to_remote 'Stop capture many', :url => {:action => :perform_end_capture_many, :method => :put }
 
