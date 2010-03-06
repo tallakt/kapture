@@ -1,0 +1,16 @@
+page.replace_html 'mode', render(:partial => 'capture/mode')
+
+if @new_data
+  if @capture && @capture.thumbnail
+    page.replace_html('preview', render(:partial => 'thumbnail', :locals => {:capture => @capture}))
+    page.replace_html('download', render(:partial => 'download_button', :locals => {:capture => @capture}))
+    page.replace_html('image_links', render(:partial => 'image_links', :locals => {:capture => @capture}))
+  end
+
+  # After clearing controller
+  if not @capture
+    page.replace_html 'preview', ''
+    page.replace_html 'download', ''
+    page.replace_html 'image_links', ''
+  end
+end

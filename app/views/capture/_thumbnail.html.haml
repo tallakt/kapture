@@ -1,4 +1,5 @@
 - if capture
-  = image_tag capture.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{capture.camera_file}"
+  - link_to :controller => :capture, :action => :show, :id => capture do
+    = image_tag capture.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{capture.camera_file}"
 
 
