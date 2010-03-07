@@ -1,3 +1,5 @@
+!faded_gray = #777
+
 #mode
   border:
     width: 1px
@@ -28,17 +30,9 @@
     padding:
       left: 5px
       right: 5px
-
-  a:hover
-    color: #ff9
+    &:hover
+      color: #ff9
       
-h1
-  font:
-    size: 1.2em
-
-h1:before
-  content: ">> "
-
 .pagination
   margin-top: 10px
   a
@@ -46,7 +40,7 @@ h1:before
     margin: 0px
     border: 
       width: 1px
-      color: #888
+      color = !faded_gray
       style: solid
     color: black
 
@@ -124,10 +118,64 @@ input
   div
     display: inline
 
+// Settings for options page
+.option .name
+  color:black
+  margin: 0
+  padding: 0
+    bottom: 10px
+    top: 20px
+
+.option .value
+  margin:
+    top: 0
+    bottom: 0
+    left: 20px
+    right: 0
+  padding:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+  padding: 0
+
+.option input
+  display: inline
+  font:
+    size: 1.0em
+
+.option 
+  line-height: 1.8em
+  a
+    white-space: nowrap
+    text:
+      decoration: none
+    color: black
+    border: 
+      width: 1px
+      color = !faded_gray
+      style: solid
+    padding: 3px
+    margin: 0px
+      
+  .selected
+    border: 
+      color: black
+    background:
+      color: #222
+    color: #fff
+
+
+span.option-type
+  color = !faded_gray
+
+
+// Global styles
+
 .footer
   text:
     align: center
-  color: #888
+  color = !faded_gray
   margin:
     top: 60px
     padding: 10px
@@ -135,7 +183,7 @@ input
     top: 
       width: 1px
       style: dashed
-      color: #888
+      color = !faded_gray
     bottom: 0
     left: 0
     right: 0
@@ -146,7 +194,7 @@ input
   margin: 0px
 
 body
-  background-color: #ccc
+  background-color: #999
   padding: 0px
   margin: 0px
 

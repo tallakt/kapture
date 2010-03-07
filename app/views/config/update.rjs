@@ -1,6 +1,6 @@
 page.replace_html 'mode', render(:partial => 'capture/mode')
 
 @options.each do |o|
-  page.replace_html "camera_option_#{o.id}", render(:partial => 'single_option_table_row', :locals => {:o => o})
-  page.visual_effect :highlight, "camera_option_#{o.id}"
+  page.replace_html "camera_option_#{o.id}", render(:partial => 'single_option', :locals => {:o => o})
+  page.visual_effect :highlight, "camera_option_#{o.id}", :startcolor => '#bbbbbb', :endcolor => '#999999'
 end

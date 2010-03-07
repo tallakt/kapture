@@ -1,6 +1,6 @@
 require 'gphoto4ruby'
 require 'fileutils'
-require 'image_science'
+require 'image_science' # git://github.com/tdd/image_science.git   =1.2.1.tdd
 require 'yaml'
 require 'benchmark'
 
@@ -183,7 +183,7 @@ class KaptureWorker
       if not cap.fullsize.match /jpe?g/
         feedback :converting_from_raw_to_jpeg
         derivative_fn = derivative_f.join(cap.camera_file.sub(/\..*?$/, '.jpg').downcase).to_s
-        %x{/usr/bin/dcraw -c -w #{cap.fullsize} | /usr/bin/cjpeg -quality 85 > #{derivative_fn}}
+        %x{/usr/bin/dcraw -c -w #{cap.fullsize} | /usr/bin/cjpeg -quality 95 > #{derivative_fn}}
         if File.exists? derivative_fn
           cap.capture_derivatives.create :comment => 'Converted to JPEG from RAW', :filename => derivative_fn
           jpeg = derivative_fn
@@ -201,14 +201,14 @@ class KaptureWorker
           factor_medium = Math.sqrt(2_000_000.0 / area)
           img.resize img.width * factor_medium, img.height * factor_medium do |medium|
             med_file = new_derivative_fn jpeg, 'medium'
-            medium.save med_file
+            medium.save med_file, ImageScience::JPEG_QUALITYNORMAL
             cap.capture_derivatives.create :comment => 'Medium - 2 megapixel', :filename => med_file
 
             # Small image is 0.25 megapixel
             factor_small = Math.sqrt(0.25 / 2.0)
             medium.resize medium.width * factor_small, medium.height * factor_small do |small|
               small_file = new_derivative_fn jpeg, 'small'
-              small.save small_file
+              small.save small_file, ImageScience::JPEG_QUALITYNORMAL
               cap.capture_derivatives.create :comment => 'Small - 0.25 megapixel', :filename => small_file
             end
           end
@@ -240,6 +240,7 @@ class KaptureWorker
     CaptureDerivative.delete_all # unsafe fast
     Capture.delete_all # unsafe fast
     files.compact!
+    puts files.inspect
     files.each {|f| File.delete f }
   end
 

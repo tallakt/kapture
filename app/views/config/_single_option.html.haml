@@ -1,0 +1,17 @@
+.name 
+  = o.name.capitalize
+  %span.option-type
+    (#{o.opt_type})
+.value 
+  - case o.opt_type
+  - when 5
+    - o.camera_allowed_options.each do |ao|
+      - if ao.value == o.value
+        = link_to_remote ao.value, {:url => {:action => :select_option, :id => ao }}, :class => 'selected'
+      - else
+        = link_to_remote ao.value, :url => {:action => :select_option, :id => ao }
+      = '  '
+  - else
+    = o.value
+
+
