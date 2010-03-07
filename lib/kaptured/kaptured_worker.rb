@@ -136,6 +136,10 @@ class KaptureWorker
       mkdir_p preview_f
       @c.save :type => :preview, :to_folder => preview_f.to_s, :new_name => preview_name
       cap.thumbnail = preview_f.join(preview_name).to_s
+      ImageScience.with_image cap.thumbnail do |img|
+        cap.preview_w = img.width
+        cap.preview_h = img.height
+      end
       cap.camera_file = file
       cap.save
     rescue => e

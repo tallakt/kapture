@@ -1,5 +1,5 @@
 - if capture
   - link_to :controller => :capture, :action => :show, :id => capture do
-    = image_tag capture.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{capture.camera_file}"
+    = image_tag capture.thumbnail.sub(Rails.root.join('public').to_s, ''), :alt => "File on camera: #{capture.camera_file}", :width => capture.preview_w, :height => capture.preview_h
 
 

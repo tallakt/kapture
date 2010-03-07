@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100228203349) do
+ActiveRecord::Schema.define(:version => 20100307085209) do
 
   create_table "camera_allowed_options", :force => true do |t|
     t.string   "value"
@@ -40,6 +40,8 @@ ActiveRecord::Schema.define(:version => 20100228203349) do
     t.string   "fullsize"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "preview_w"
+    t.integer  "preview_h"
   end
 
   create_table "worker_feedbacks", :force => true do |t|
