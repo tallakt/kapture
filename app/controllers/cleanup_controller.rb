@@ -9,12 +9,12 @@ class CleanupController < ApplicationController
   end
 
   def cleanup_camera
-    WorkerTask.create :task_yaml => {:method => :cleanup_camera}.to_yaml
+    WorkerTask.create :task => {:method => :cleanup_camera}
     redirect_to :action => :index
   end
 
   def cleanup_beagle
-    WorkerTask.create :task_yaml => {:method => :cleanup_beagle}.to_yaml
+    WorkerTask.create :task => {:method => :cleanup_beagle}
     redirect_to :action => :index
   end
 end

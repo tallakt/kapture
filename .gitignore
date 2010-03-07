@@ -4,3 +4,5 @@ log/*
 kaptured.rb.pid
 public/images/camera/*
 tmp
+db/*sqlite3
+log/*

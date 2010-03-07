@@ -1,0 +1,74 @@
+== KAPture
+
+A rails application for remote capturing of pictures using GPhoto.
+
+
+This application runs on any Linux machine, windows not tried yet, and was intended to run on a Beagleboard
+for use in a KAP setup (kite aerial photograpy).
+
+If the installation seems a bit difficult, I plan to make available a disk image for the
+beagleboard that can be put on a memory card and run directly on a Beagleboard.
+
+=== Installation
+
+You will need to install the following commands
+
+  * git
+  * dcraw (executable in standard folder /usr/bin)
+  * cjpeg (executable in standard folder /usr/bin)
+
+Also, the following gems
+
+  * RubyInline
+  * jeweler
+  * rails
+  * hoe
+  * rspec
+  * <install any other gems as they are reported missing ;-) >
+  * will_paginate
+
+Two gems must be installed from github:
+
+  cd ~
+  sudo apt-get install libgphoto2-2-dev
+  git clone git://github.com/tallakt/gphoto4ruby.git
+  cd gphoto4ruby
+  sudo rake install
+
+  cd ~
+  sudo apt-get install libfreeimage-dev libfreeimage3
+  git clone git://github.com/tdd/image_science.git
+  cd image_science
+  sudo rake install_gem
+
+Clone the project from GitHub
+
+  cd ~
+  git clone http://github.com/tallakt/kapture.git
+  cd kapture
+
+To generate the production database run the following commands from the
+
+  RAILS_ENV=production rake db:create
+  RAILS_ENV=production rake db:migrate
+
+
+Install the daemon service, it will handle communication with the camera
+
+  rake daemon:install
+
+It will now start with the machine, to start it now type
+
+  sudo /etc/init.d/kaptured
+  sudo /etc/init.d/kaptured start
+
+To start the server, type:
+
+  RAILS_ENV=production script/server --port=80
+
+(Sorry , no init.d script yet)
+
+
+At this stage, if everything went well, point yout browser to your machine name or ip address and plug in your camera to the USB port.
+
+

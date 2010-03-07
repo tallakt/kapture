@@ -9,7 +9,7 @@ class ConfigController < ApplicationController
   def select_option 
     ao = CameraAllowedOption.find(params[:id])
     logger.info 'select option, value: %s' % ao.value
-    WorkerTask.create :task_yaml => {:method => :set_camera_config, :args => [{ao.camera_option.name => ao.value}]}.to_yaml
+    WorkerTask.create :task => {:method => :set_camera_config, :args => [{ao.camera_option.name => ao.value}]}
     render :nothing => true
   end
 

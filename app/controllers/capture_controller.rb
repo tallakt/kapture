@@ -4,7 +4,7 @@ class CaptureController < ApplicationController
 
   def update_new_data
     @new_data = true
-    if cookies[:newest]
+    if cookies[:newest] && @capture
       cc = Capture.find_by_id @capture.id, :conditions => ['updated_at > ?', cookies[:newest]]
       @new_data = false unless cc
       cookies[:newest] = @capture.updated_at.to_s(:db)

@@ -1,0 +1,62 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          kaptured
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: KAPture daemon http://github.com/tallakt/kapture
+# Description:       File to start KAPture dameon as startup script on Linux
+#                    placed in /etc/init.d.
+### END INIT INFO
+
+# Author: Tallak Tveide <tallak@tveide.net>
+#
+
+# Do NOT "set -e"
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+RAILS_ROOT="REPLACED BY rake daemon:install"
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="KAPture daemon http://github.com/tallakt/kapture"
+NAME=kaptured
+RAILS_RUNNER="$RAILS_ROOT/script/runner"
+RUBY_DAEMON="$RAILS_ROOT/lib/kaptured/kaptured.rb"
+PIDFILE=/var/run/$NAME.rb.pid
+SCRIPTNAME=/etc/init.d/$NAME
+export RAILS_ENV=production
+export RUBYOPT=rubygems
+
+
+case "$1" in
+  start)
+    echo "Starting KAPture daemon"
+    CMD="$RAILS_RUNNER $RUBY_DAEMON start"
+    echo $CMD
+    $CMD
+    ;;
+  stop)
+    echo "Stopping KAPture daemon"
+    CMD="$RAILS_RUNNER $RUBY_DAEMON stop"
+    echo $CMD
+    $CMD
+    ;;
+  restart)
+    echo "Restarting KAPture daemon"
+    CMD="$RAILS_RUNNER $RUBY_DAEMON restart"
+    echo $CMD
+    $CMD
+    ;;
+  run)
+    echo "Running (no detatch from terminal) KAPture daemon"
+    CMD="$RAILS_RUNNER $RUBY_DAEMON run"
+    echo $CMD
+    $CMD
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart|run}" >&2
+    exit 3
+    ;;
+esac
+
+:

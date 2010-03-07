@@ -19,7 +19,8 @@ options = {
              :ontop      => false,
              :backtrace  => true,
              :log_output => true,
-             :monitor    => true
+             :monitor    => true,
+             :dir_mode   => :system,
            }
 
 Daemons.run_proc(FILE_NAME, options) do
