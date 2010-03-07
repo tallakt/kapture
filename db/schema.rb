@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100307085209) do
+ActiveRecord::Schema.define(:version => 20100307105401) do
 
   create_table "camera_allowed_options", :force => true do |t|
     t.string   "value"
@@ -53,9 +53,9 @@ ActiveRecord::Schema.define(:version => 20100307085209) do
   end
 
   create_table "worker_tasks", :force => true do |t|
-    t.string   "task_yaml"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "task"
   end
 
 end

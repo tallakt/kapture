@@ -1,7 +1,6 @@
 require 'gphoto4ruby'
 require 'fileutils'
 require 'image_science' # git://github.com/tdd/image_science.git   =1.2.1.tdd
-require 'yaml'
 require 'benchmark'
 
 class KaptureWorker
@@ -53,7 +52,7 @@ class KaptureWorker
       all = WorkerTask.all
     end
     all.each do |task_record|
-      task = YAML::load task_record.task_yaml
+      task = task_record.task
       # most primitive security scheme
       bm = Benchmark.measure 'Task ' + task[:method].to_s do
         send task[:method], *(task[:args] || []) unless Object.respond_to? task[:method]
@@ -112,7 +111,7 @@ class KaptureWorker
       feedback :capturing_repeated
       perform_capture
       if not @stop_capture
-        new_task = WorkerTask.create :task_yaml => {:method => :continuous_capture }.to_yaml
+        new_task = WorkerTask.create :task => {:method => :continuous_capture }
         new_task.save
       end
   end

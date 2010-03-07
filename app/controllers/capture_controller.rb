@@ -38,24 +38,24 @@ class CaptureController < ApplicationController
   end
 
   def perform_capture
-    WorkerTask.create :task_yaml => {:method => :capture}.to_yaml
+    WorkerTask.create :task => {:method => :capture}
     render :nothing => true
   end
 
   def perform_end_capture_many
-    WorkerTask.create :task_yaml => {:method => :end_capture_many}.to_yaml
+    WorkerTask.create :task => {:method => :end_capture_many}
     render :nothing => true
   end
 
   def perform_capture_many
-    WorkerTask.create :task_yaml => {:method => :capture_many}.to_yaml
+    WorkerTask.create :task => {:method => :capture_many}
     render :nothing => true
   end
 
   def perform_download
     capture = Capture.find(params[:id])
     raise 'Downloading nonexistent capture' unless capture
-    WorkerTask.create :task_yaml => {:method => :download, :args => [capture.id]}.to_yaml
+    WorkerTask.create :task => {:method => :download, :args => [capture.id]}
     #TODO redirect to browser for that image
     render :nothing => true
   end
