@@ -40,6 +40,9 @@ Also, the following gems
 * rspec
 * will_paginate
 * mongrel
+* sqlite3-ruby
+* haml
+
 
 Install any other gems as they are reported missing ;-)
 
@@ -60,7 +63,7 @@ Two gems must be installed from github:
 Clone the project from GitHub
 
   cd ~
-  git clone http://github.com/tallakt/kapture.git
+  git clone git://github.com/tallakt/kapture.git
   cd kapture
 
 To generate the production database run the following commands from the

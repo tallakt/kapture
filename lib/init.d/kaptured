@@ -26,7 +26,7 @@ PIDFILE=/var/run/$NAME.rb.pid
 SCRIPTNAME=/etc/init.d/$NAME
 export RAILS_ENV=production
 export RUBYOPT=rubygems
-
+cd $RAILS_ROOT
 
 case "$1" in
   start)

@@ -6,3 +6,4 @@ public/images/camera/*
 tmp
 db/*sqlite3
 log/*
+db/development.sqlite3-journal
