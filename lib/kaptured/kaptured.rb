@@ -19,7 +19,7 @@ options = {
              :ontop      => false,
              :backtrace  => true,
              :log_output => true,
-             :monitor    => true,
+             :monitor    => false,
              :dir        => 'log/',
              :dir_mode   => :normal,
            }
