@@ -39,35 +39,28 @@ namespace 'daemon' do
   end
 
   # MONGREL
-  INIT_D_FILE_MONGREL = '/etc/init.d/mongrel'
-  INIT_D_SOURCE_MONGREL = 'lib/init.d/mongrel'
 
-  desc 'Install mongrel daemon in init.d (run with sudo)'
-  task :install_mongrel do
-    puts "Copying startup script file to #{INIT_D_FILE_MONGREL}"
-    puts "Setting RAILS_ROOT=#{RAILS_ROOT} in the new file"
-    copy_file_with_replace INIT_D_SOURCE_MONGREL, INIT_D_FILE_MONGREL, /^RAILS_ROOT.=?.*/, 'RAILS_ROOT="%s"' % RAILS_ROOT
-    puts 'Change mode to executable'
-    sh "chmod +x #{INIT_D_FILE_MONGREL}"
-    cmd = 'update-rc.d mongrel defaults'
-    puts 'Running: ' + cmd
-    sh cmd
-    puts "done."
+  desc 'Install Thin web server - run with sudo'
+  task :install_thin do
+    mkdir '/etc/thin' unless File.exists? '/etc/thin'
+    sh "thin config -c #{RAILS_ROOT} --port 80 -d --environment production --servers 1 -C /etc/thin/kapture.yml " +
+        "--max-persistent-conns 32 --max-conns 64 --tag kapture-thin -r rubygems"
+    sh 'thin install'
+    sh 'update-rc.d thin defaults'
+    puts "\n" + 'sudo /etc/init.d/thin start  -- type this to start Thin now'
+    puts "\n\nNote: If you are unable to run Thin, make sure you only have Rack v1.0.1 installed"
   end
 
-  desc 'Uninstall mongrel'
-  task :uninstall_mongrel do
-    puts "Deleting #{INIT_D_FILE_MONGREL}"
-    sh "rm #{INIT_D_FILE_MONGREL}"
-    cmd = 'update-rc.d mongrel remove'
-    puts 'Running: ' + cmd
-    sh cmd
-    puts "done."
+  desc 'Uninstall Thin'
+  task :uninstall_thin do
+    rm '/etc/thin/kapture.yml'
+    rm '/etc/init.d/thin'
+    sh 'update-rc.d thin remove'
   end
 
-  desc 'Install mongrel and kaptured daemons in init.d (use sudo)'
-  task :install => [:install_kaptured, :install_mongrel]
+  desc 'Install Thin and Kaptured daemons in init.d (use sudo)'
+  task :install => [:install_kaptured, :install_thin]
 
-  desc 'Uninstall mongrel and kaptured daemons in init.d (use sudo)'
-  task :uninstall => [:uninstall_kaptured, :uninstall_mongrel]
+  desc 'Uninstall Thin and Kaptured daemons in init.d (use sudo)'
+  task :uninstall => [:uninstall_kaptured, :uninstall_thin]
 end

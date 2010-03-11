@@ -39,7 +39,7 @@ Also, the following gems
 * hoe
 * rspec
 * will_paginate
-* mongrel
+* thin
 * sqlite3-ruby
 * haml
 
@@ -52,6 +52,8 @@ Two gems must be installed from github:
   sudo apt-get install libgphoto2-2-dev
   git clone git://github.com/tallakt/gphoto4ruby.git
   cd gphoto4ruby
+  git fetch origin eos_40D_bugs:eos_40D_bugs
+  git checkout -b eos_40D_bugs
   sudo rake install
 
   cd ~
@@ -72,7 +74,7 @@ To generate the production database run the following commands from the
   RAILS_ENV=production rake db:migrate
 
 
-Install the daemon services for mongrel and kaptured. The kaptured daemon will handle communication with the camera
+Install the daemon services for thin and kaptured. The kaptured daemon will handle communication with the camera
 
   rake daemon:install
 
@@ -81,8 +83,8 @@ It will now start with the machine, to start it now type
   sudo /etc/init.d/kaptured
   sudo /etc/init.d/kaptured start
 
-  sudo /etc/init.d/mongrel
-  sudo /etc/init.d/mongrel start
+  sudo /etc/init.d/thin
+  sudo /etc/init.d/thin start
 
 At this stage, if everything went well, point yout browser to your machine name or ip address and plug in your camera to the USB port.
 
@@ -94,7 +96,7 @@ Running in development mode is simple.
   cd ~/kapture
   rake db:create
   rake db:migrate
-  script/server
+  thin start
 
 In a separate window type
 

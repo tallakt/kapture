@@ -19,13 +19,12 @@
 RAILS_ROOT="REPLACED BY rake daemon:install"
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="KAPture daemon http://github.com/tallakt/kapture"
-NAME=kaptured
 RAILS_RUNNER="$RAILS_ROOT/script/runner"
 RUBY_DAEMON="$RAILS_ROOT/lib/kaptured/kaptured.rb"
-PIDFILE=/var/run/$NAME.rb.pid
 SCRIPTNAME=/etc/init.d/$NAME
 export RAILS_ENV=production
 export RUBYOPT=rubygems
+
 cd $RAILS_ROOT
 
 case "$1" in
