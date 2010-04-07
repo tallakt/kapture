@@ -3,11 +3,6 @@ opkg update
 
 # Install kapture dependencies from angstrom precompiled packages
 opkg install \
-	task-proper-tools \
-	task-base-extended \
-	angstrom-led-config \
-	zd1211-firmware \
-	rt73-firmware \
 	make  \
 	gcc  \
 	gcc-symlinks  \
@@ -29,10 +24,17 @@ opkg install \
 	lcms-dev \
 	gphoto2-dev \
 	libgphoto2-dev \
+  g++ \
+  g++-symlinks \
+  openssl \
+  openssl-dev \
 
-# removed hotplug
-
-#opkg install /media/mmcblk0p1/ipk/ruby_1.9.1-p378-r1.1_armv7a.ipk 
+#removed hotplug
+#task-proper-tools \
+#task-base-extended \
+#angstrom-led-config \
+#zd1211-firmware \
+#rt73-firmware \
 
 # Install ruby
 cd ~
@@ -50,7 +52,7 @@ cd ~
 gem update --system
 gem install gemcutter
 gem tumble
-gem install RubyInline jeweler rails hoe rspec will_paginate thin sqlite3-ruby haml
+gem install RubyInline jeweler rails hoe rspec will_paginate thin sqlite3-ruby haml gphoto4ruby
 
 
 # compile dcraw - conversion from RAW to jpeg
@@ -62,20 +64,14 @@ gcc -o dcraw -O4 dcraw.c -lm -ljpeg -llcms
 cp dcraw /usr/bin/dcraw
 
 
-# Install gphoto4ruby, some modifications by myself
-cd ~
-git clone git://github.com/tallakt/gphoto4ruby.git
-cd gphoto4ruby
-git fetch origin eos_40D_bugs:eos_40D_bugs
-git checkout -b eos_40D_bugs
-rake install
-
 # Install image science gem
 cd ~
-sudo apt-get install libfreeimage-dev libfreeimage3
 git clone git://github.com/tdd/image_science.git
 cd image_science
+rubyforge setup
 rake install_gem
+gem install --local pkg/image_science-1.2.1.tdd.gem 
+
 
 
 # install kapture project

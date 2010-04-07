@@ -17,7 +17,7 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 RAILS_ROOT="REPLACED BY rake daemon:install"
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 DESC="KAPture daemon http://github.com/tallakt/kapture"
 RAILS_RUNNER="$RAILS_ROOT/script/runner"
 RUBY_DAEMON="$RAILS_ROOT/lib/kaptured/kaptured.rb"
