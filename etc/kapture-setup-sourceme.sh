@@ -91,6 +91,14 @@ rake daemon:install
 /etc/init.d/thin start
 
 
+# Turn off DVI display
+# With DVI: 1.65W
+# Without DVI: 0.92W
+cp -p /home/root/kapture/etc/beagleboard-disable-display.sh /etc/init.d/
+update-rc.d beagleboard-disable-display.sh start 99 3 .
+
+
+
 
 
 
