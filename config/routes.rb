@@ -39,6 +39,9 @@ ActionController::Routing::Routes.draw do |map|
   # Install the default routes as the lowest priority.
   # Note: These default routes make all actions in every controller accessible via GET requests. You should
   # consider removing or commenting them out if you're using named routes and resources.
+  map.connect 'servo/:action/less', :controller=> :servo, :offset => -1
+  map.connect 'servo/:action/more', :controller=> :servo, :offset => 1
+  map.connect 'servo/tilt_to/:amount', :controller=> :servo, :action => :tilt_to
   map.connect ':controller/:action/:id'
   map.connect ':controller/:action/:id.:format'
 end

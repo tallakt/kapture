@@ -1,0 +1,1 @@
+page.replace_html 'mode', render(:partial => 'capture/mode')

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100307105401) do
+ActiveRecord::Schema.define(:version => 20100606073615) do
 
   create_table "camera_allowed_options", :force => true do |t|
     t.string   "value"
@@ -42,6 +42,18 @@ ActiveRecord::Schema.define(:version => 20100307105401) do
     t.datetime "updated_at"
     t.integer  "preview_w"
     t.integer  "preview_h"
+    t.text     "histogram"
+  end
+
+  create_table "servo_options", :force => true do |t|
+    t.float    "rotation_neutral"
+    t.float    "rotation_rpm"
+    t.float    "tilt_horizontal"
+    t.float    "tilt_vertical"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "rotation_pin"
+    t.integer  "tilt_pin"
   end
 
   create_table "worker_feedbacks", :force => true do |t|

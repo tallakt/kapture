@@ -1,0 +1,14 @@
+%p
+  Please specity where your servos are connected
+
+  - form_for @opts, :url => { :action => :post_servo_pins } do |f|
+    %p
+      = f.label :tilt_pin, 'Tilt servo is connected to pin'
+      = f.text_field :tilt_pin, :size => 5
+    %p
+      = f.label :tilt_pin, 'Pan servo is connected to pin'
+      = f.text_field :rotation_pin, :size => 5
+    %p
+      = submit_tag 'Next step'
+
+//= periodically_call_remote :url => 'servo', :frequency => 1.0, :method => :get

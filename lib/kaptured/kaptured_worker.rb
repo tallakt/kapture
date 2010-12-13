@@ -264,6 +264,44 @@ class KaptureWorker
       end
     end
   end
+
+
+  #
+  # SERVO POSITIONING
+  #
+
+  def position_servo(pin, percentage)
+    begin
+      File.open '/dev/servodrive0', 'w' do |f|
+        f.puts '%d:%d' % [pin, [[0, percentage.to_i].max, 100].min]
+      end
+    rescue => e
+      log_exception 'Servo position failed', e
+    end
+  end
+
+
+  def servo_off(pin)
+    begin
+      File.open '/dev/servodrive0', 'w' do |f|
+        f.puts '%d:off' % pin
+      end
+    rescue => e
+      log_exception 'Servo off failed', e
+    end
+  end
+
+  private :position_servo, :servo_off
+
+  def set_tilt(angle_from_horizontal)
+    o = ServoOptions.get
+    position_servo o.tilt_pin, o.tilt_horizontal + (o.tilt_vertical - o.tilt_horizontal) * (angle_from_horizontal / 90.0)
+  end
+
+  def set_pan_speed(rpm)
+    o = ServoOptions.get
+    position_servo o.rotation_pin, o.rotation_neutral + rpm * 100.0 / o.rotation_rpm
+  end
 end
 
 

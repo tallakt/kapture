@@ -1,0 +1,19 @@
+%p
+  [This is where servo control functionality will be]
+
+%h1 Tilt
+%p
+  = button_to_remote 'Horizontal', :url => {:action => 'tilt_to/0', :method => :post }
+  %br
+  - (1..8).each do |n|
+    - deg = n * 10
+    = button_to_remote '%d degrees' % deg, :url => {:action => 'tilt_to/%d' % deg, :method => :post }
+    %br
+  = button_to_remote 'Vertical', :url => {:action => 'tilt_to/90', :method => :post }
+  %br
+
+%p
+  = link_to 'Calibration', :action => :calibration
+
+
+//= periodically_call_remote :url => 'servo', :frequency => 1.0, :method => :get

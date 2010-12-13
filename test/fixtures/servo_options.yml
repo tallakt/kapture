@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  rotation_pin: 
+  rotation_neutral: 1.5
+  rotation_rpm: 1.5
+  tilt_pin: 
+  tilt_horizontal: 1.5
+  tilt_vertical: 1.5
+
+two:
+  rotation_pin: 
+  rotation_neutral: 1.5
+  rotation_rpm: 1.5
+  tilt_pin: 
+  tilt_horizontal: 1.5
+  tilt_vertical: 1.5

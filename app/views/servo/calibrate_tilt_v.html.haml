@@ -1,0 +1,12 @@
+%p
+  Please move the tilt servo to the vertical position
+
+%p
+  = button_to_remote 'Less', :url => {:action => 'calibrate_tilt_v', :offset => -1 , :method => :post }
+  = button_to_remote 'More', :url => {:action => 'calibrate_tilt_v', :offset => 1, :method => :post }
+
+%p
+  = link_to 'Next', :action => 'calibrate_pan_zero'
+  
+
+// = periodically_call_remote :url => 'servo/index', :frequency => 1.0, :method => :get
